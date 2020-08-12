@@ -3,18 +3,25 @@ package consumer
 import (
 	"github.com/RichardKnop/machinery/v1"
 	"github.com/RichardKnop/machinery/v1/config"
+	"net/http"
 )
 
 type Consumer struct {
 	Taskserver  *machinery.Server
 	AppURL      string
 	Concurrency int
+	Client      HTTPClient
+}
+
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
 }
 
 func NewConsumer() (*Consumer, error) {
 	c := &Consumer{
 		AppURL:      "http://localhost:8081",
 		Concurrency: 1,
+		Client:      &http.Client{},
 	}
 
 	taskserver, err := machinery.NewServer(&config.Config{
