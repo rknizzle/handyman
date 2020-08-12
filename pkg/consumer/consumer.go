@@ -33,7 +33,7 @@ func NewConsumer() (*Consumer, error) {
 }
 
 func (c *Consumer) Start() error {
-	worker := c.Taskserver.NewWorker("worker", c.Concurrency)
+	worker := c.Taskserver.NewWorker("handyman", c.Concurrency)
 	err := worker.Launch()
 	if err != nil {
 		return err
