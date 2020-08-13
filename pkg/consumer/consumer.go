@@ -1,6 +1,7 @@
 package consumer
 
 import (
+	"bytes"
 	"github.com/RichardKnop/machinery/v1"
 	"github.com/RichardKnop/machinery/v1/config"
 	"net/http"
@@ -49,10 +50,22 @@ func (c *Consumer) Start() error {
 	return nil
 }
 
-func (c *Consumer) handleTask() error {
+func (c *Consumer) handleTask(taskMessage string) (string, error) {
 	// send task message in HTTP req to app server
+	_, err := c.sendRequestToApp(taskMessage)
+	if err != nil {
+		return "", err
+	}
 	// get the response
 	// do something with response
 
-	return nil
+	return "returnVal", nil
+}
+
+func (c *Consumer) sendRequestToApp(taskMessage string) (*http.Response, error) {
+	request, err := http.NewRequest(http.MethodPost, c.AppURL, bytes.NewReader([]byte(taskMessage)))
+	if err != nil {
+		return nil, err
+	}
+	return c.Client.Do(request)
 }
