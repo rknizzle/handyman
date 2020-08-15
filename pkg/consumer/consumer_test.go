@@ -1,6 +1,7 @@
 package consumer
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -87,5 +88,68 @@ func TestSendRequestToAppUsesTaskMessageUnit(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+	}
+}
+
+func TestHandleTaskUnit(t *testing.T) {
+	c, err := createConsumerWithMockedClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	type mockedHTTPResponse struct {
+		Resp *http.Response
+		Err  error
+	}
+
+	type test struct {
+		name         string
+		httpResponse mockedHTTPResponse
+		wantErr      bool
+	}
+
+	tests := []test{
+		test{
+			name:         "200",
+			httpResponse: mockedHTTPResponse{&http.Response{Status: "200"}, nil},
+			wantErr:      false,
+		},
+		test{
+			name:         "201",
+			httpResponse: mockedHTTPResponse{&http.Response{Status: "201"}, nil},
+			wantErr:      false,
+		},
+		test{
+			name:         "400",
+			httpResponse: mockedHTTPResponse{&http.Response{Status: "400"}, nil},
+			wantErr:      true,
+		},
+		test{
+			name:         "500",
+			httpResponse: mockedHTTPResponse{&http.Response{Status: "500"}, nil},
+			wantErr:      true,
+		},
+		test{
+			name:         "error",
+			httpResponse: mockedHTTPResponse{nil, errors.New("")},
+			wantErr:      true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// mock the HTTP requests return value to avoid external calls in unit test
+			GetDoFunc = func(req *http.Request) (*http.Response, error) {
+				return tc.httpResponse.Resp, tc.httpResponse.Err
+			}
+
+			got := c.handleTask("")
+
+			// test that handleTask returns an error when an error is expected (an
+			// error is expected when the HTTP request returns a non 2xx status code)
+			if tc.wantErr == (got == nil) {
+				t.Fatalf("%s: Wanted an error: %v. Got error value of: %v", tc.name, tc.wantErr, got)
+			}
+		})
 	}
 }
