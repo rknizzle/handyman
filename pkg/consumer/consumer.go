@@ -2,6 +2,8 @@ package consumer
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"github.com/RichardKnop/machinery/v1"
 	"github.com/RichardKnop/machinery/v1/config"
 	"net/http"
@@ -50,16 +52,20 @@ func (c *Consumer) Start() error {
 	return nil
 }
 
-func (c *Consumer) handleTask(taskMessage string) (string, error) {
+// return an error when the HTTP request responds with a non 2xx status code
+func (c *Consumer) handleTask(taskMessage string) error {
 	// send task message in HTTP req to app server
-	_, err := c.sendRequestToApp(taskMessage)
+	resp, err := c.sendRequestToApp(taskMessage)
 	if err != nil {
-		return "", err
+		return err
 	}
-	// get the response
-	// do something with response
 
-	return "returnVal", nil
+	// if non-2xx status code
+	if string(resp.Status[0]) != "2" {
+		return errors.New(fmt.Sprintf("Recieved non-successful status code %s", resp.Status))
+	}
+
+	return nil
 }
 
 func (c *Consumer) sendRequestToApp(taskMessage string) (*http.Response, error) {
