@@ -68,26 +68,29 @@ func TestSendRequestToAppUsesTaskMessageUnit(t *testing.T) {
 		"",
 	}
 
-	for _, tc := range tests {
-		// mock the Do function to verify that it is passed the task message correctly
-		GetDoFunc = func(req *http.Request) (*http.Response, error) {
-			// get the request body
-			body, err := ioutil.ReadAll(req.Body)
+	for i, tc := range tests {
+		t.Run(string(i), func(t *testing.T) {
+
+			// mock the Do function to verify that it is passed the task message correctly
+			GetDoFunc = func(req *http.Request) (*http.Response, error) {
+				// get the request body
+				body, err := ioutil.ReadAll(req.Body)
+				if err != nil {
+					t.Fatal(err)
+				}
+				// verify that the request passed into client.Do contains the task message
+				// in the body
+				if string(body) != tc {
+					t.Fatalf("Expected %s in request body but got %s", tc, string(body))
+				}
+				return nil, nil
+			}
+
+			_, err = c.sendRequestToApp(tc)
 			if err != nil {
 				t.Fatal(err)
 			}
-			// verify that the request passed into client.Do contains the task message
-			// in the body
-			if string(body) != tc {
-				t.Fatalf("Expected %s in request body but got %s", tc, string(body))
-			}
-			return nil, nil
-		}
-
-		_, err = c.sendRequestToApp(tc)
-		if err != nil {
-			t.Fatal(err)
-		}
+		})
 	}
 }
 
