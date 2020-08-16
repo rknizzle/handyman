@@ -73,5 +73,6 @@ func (c *Consumer) sendRequestToApp(taskMessage string) (*http.Response, error) 
 	if err != nil {
 		return nil, err
 	}
+	request.Header.Set("Content-Type", "application/json")
 	return c.Client.Do(request)
 }
