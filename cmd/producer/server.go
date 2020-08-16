@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/rknizzle/handyman/pkg/producer"
@@ -25,9 +26,11 @@ func main() {
 
 func produce(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		// send task message to the queue to be consumed
-		// TODO: pass request body as the task message
-		res, err := p.Produce("")
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(r.Body)
+		jsonBody := buf.String()
+
+		res, err := p.Produce(jsonBody)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
