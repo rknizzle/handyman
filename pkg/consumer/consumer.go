@@ -53,19 +53,24 @@ func (c *Consumer) Start() error {
 }
 
 // return an error when the HTTP request responds with a non 2xx status code
-func (c *Consumer) handleTask(taskMessage string) error {
+func (c *Consumer) handleTask(taskMessage string) (string, error) {
 	// send task message in HTTP req to app server
 	resp, err := c.sendRequestToApp(taskMessage)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// if non-2xx status code
 	if string(resp.Status[0]) != "2" {
-		return errors.New(fmt.Sprintf("Recieved non-successful status code %s", resp.Status))
+		return "", errors.New(fmt.Sprintf("Recieved non-successful status code %s", resp.Status))
 	}
 
-	return nil
+	// get JSON response
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(resp.Body)
+	jsonBody := buf.String()
+
+	return jsonBody, nil
 }
 
 func (c *Consumer) sendRequestToApp(taskMessage string) (*http.Response, error) {
