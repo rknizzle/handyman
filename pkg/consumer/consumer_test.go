@@ -1,6 +1,7 @@
 package consumer
 
 import (
+	"bytes"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -113,14 +114,25 @@ func TestHandleTaskUnit(t *testing.T) {
 
 	tests := []test{
 		test{
-			name:         "200",
-			httpResponse: mockedHTTPResponse{&http.Response{Status: "200"}, nil},
-			wantErr:      false,
+			name: "200",
+			httpResponse: mockedHTTPResponse{
+				&http.Response{
+					Body:   ioutil.NopCloser(bytes.NewReader([]byte{})),
+					Status: "200"},
+				nil,
+			},
+			wantErr: false,
 		},
 		test{
-			name:         "201",
-			httpResponse: mockedHTTPResponse{&http.Response{Status: "201"}, nil},
-			wantErr:      false,
+			name: "201",
+			httpResponse: mockedHTTPResponse{
+				&http.Response{
+					Body:   ioutil.NopCloser(bytes.NewReader([]byte{})),
+					Status: "201",
+				},
+				nil,
+			},
+			wantErr: false,
 		},
 		test{
 			name:         "400",
@@ -146,12 +158,12 @@ func TestHandleTaskUnit(t *testing.T) {
 				return tc.httpResponse.Resp, tc.httpResponse.Err
 			}
 
-			got := c.handleTask("")
+			_, gotErr := c.handleTask("")
 
 			// test that handleTask returns an error when an error is expected (an
 			// error is expected when the HTTP request returns a non 2xx status code)
-			if tc.wantErr == (got == nil) {
-				t.Fatalf("%s: Wanted an error: %v. Got error value of: %v", tc.name, tc.wantErr, got)
+			if tc.wantErr == (gotErr == nil) {
+				t.Fatalf("%s: Wanted an error: %v. Got error value of: %v", tc.name, tc.wantErr, gotErr)
 			}
 		})
 	}
