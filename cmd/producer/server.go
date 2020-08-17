@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/RichardKnop/machinery/v1/config"
 	"github.com/rknizzle/handyman/pkg/producer"
 	"net/http"
 )
@@ -12,7 +13,12 @@ var p *producer.Producer
 
 func main() {
 	var err error
-	p, err = producer.NewProducer()
+	c, err := config.NewFromYaml("config.yml", false)
+	if err != nil {
+		panic(err)
+	}
+
+	p, err = producer.NewProducerWithConfig(c)
 	if err != nil {
 		panic(err)
 	}
