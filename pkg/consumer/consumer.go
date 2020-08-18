@@ -20,6 +20,30 @@ type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
+func NewConsumerFromCfgFile(cfgPath string) (*Consumer, error) {
+	cfg, err := NewConsumerConfig(cfgPath)
+	if err != nil {
+		return nil, err
+	}
+
+	c := &Consumer{
+		AppURL:      cfg.AppURL,
+		Concurrency: cfg.Concurrency,
+		Client:      &http.Client{},
+	}
+
+	taskserver, err := machinery.NewServer(cfg.MachineryConfig)
+	if err != nil {
+		return nil, err
+	}
+	c.Taskserver = taskserver
+
+	c.Taskserver.RegisterTasks(map[string]interface{}{
+		"handyman": c.handleTask,
+	})
+	return c, nil
+}
+
 func NewConsumer() (*Consumer, error) {
 	c := &Consumer{
 		AppURL:      "http://localhost:8081",
