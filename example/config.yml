@@ -1,5 +1,5 @@
 broker: "redis://localhost:6379"
 result_backend: "redis://localhost:6379"
-default_queue: ""
+default_queue: "default"
 appURL: "http://localhost:8081"
 concurrency: 1
