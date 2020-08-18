@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	c, err := consumer.NewConsumer()
+	c, err := consumer.NewConsumerFromCfgFile("config.yml")
 	if err != nil {
 		panic(err)
 	}
