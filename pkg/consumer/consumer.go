@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/RichardKnop/machinery/v1"
-	"github.com/RichardKnop/machinery/v1/config"
 	"net/http"
 )
 
@@ -33,28 +32,6 @@ func NewConsumerFromCfgFile(cfgPath string) (*Consumer, error) {
 	}
 
 	taskserver, err := machinery.NewServer(cfg.MachineryConfig)
-	if err != nil {
-		return nil, err
-	}
-	c.Taskserver = taskserver
-
-	c.Taskserver.RegisterTasks(map[string]interface{}{
-		"handyman": c.handleTask,
-	})
-	return c, nil
-}
-
-func NewConsumer() (*Consumer, error) {
-	c := &Consumer{
-		AppURL:      "http://localhost:8081",
-		Concurrency: 1,
-		Client:      &http.Client{},
-	}
-
-	taskserver, err := machinery.NewServer(&config.Config{
-		Broker:        "redis://localhost:6379",
-		ResultBackend: "redis://localhost:6379",
-	})
 	if err != nil {
 		return nil, err
 	}
