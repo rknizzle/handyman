@@ -20,18 +20,6 @@ func NewProducerWithConfig(c *config.Config) (*Producer, error) {
 	return &Producer{Taskserver: taskserver}, nil
 }
 
-func NewProducer() (*Producer, error) {
-	taskserver, err := machinery.NewServer(&config.Config{
-		Broker:        "redis://localhost:6379",
-		ResultBackend: "redis://localhost:6379",
-	})
-
-	if err != nil {
-		return nil, err
-	}
-	return &Producer{Taskserver: taskserver}, nil
-}
-
 func (p *Producer) Produce(contents string) (*result.AsyncResult, error) {
 	task := tasks.Signature{
 		Name: "handyman",
